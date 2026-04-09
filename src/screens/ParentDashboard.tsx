@@ -195,8 +195,9 @@ export function ParentDashboard({ navigation }: Props) {
             {gameLevels.matching}, Colors: {gameLevels.sorting}, Patterns:{' '}
             {gameLevels.patterns}, Feelings: {gameLevels.emotions}, Sounds:{' '}
             {gameLevels.sounds}, Listen & speak: {gameLevels.echo}, Rhymes:{' '}
-            {gameLevels.rhymes}, Read aloud: {gameLevels.reading}, Tagalog words:{' '}
-            {gameLevels.tagalogEcho}, Tagalog read: {gameLevels.tagalogRead}.
+            {gameLevels.rhymes}, Read aloud: {gameLevels.reading}, Clock:{' '}
+            {gameLevels.clock}, Tagalog words: {gameLevels.tagalogEcho}, Tagalog read:{' '}
+            {gameLevels.tagalogRead}.
           </Text>
           <CalmButton
             label="Reset all levels to 1"

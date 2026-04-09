@@ -1,0 +1,33 @@
+# Keep EAS uploads minimal and reproducible (server installs deps).
+
+# Dependencies (must be installed fresh on EAS Linux worker)
+node_modules/
+
+# Expo / Metro local artifacts
+.expo/
+.expo-export-test*/
+dist/
+web-build/
+.metro-health-check*
+
+# Build outputs / caches
+android/.gradle/
+android/build/
+android/app/build/
+android/.cxx/
+
+# Local machine Android config (breaks EAS SDK path)
+android/local.properties
+
+# Native local artifacts
+ios/
+.kotlin/
+
+# Debug/log/temp files
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+*.tsbuildinfo
+
+# Misc
+.DS_Store

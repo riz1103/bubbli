@@ -1,8 +1,10 @@
 import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { CalmButton } from '../components/CalmButton';
+import { SoftCard } from '../components/SoftCard';
 import { SoftModal } from '../components/SoftModal';
 import { EmotionMatchingGame } from '../features/games/emotions/EmotionMatchingGame';
 import { ShapeMatchingGame } from '../features/games/matching/ShapeMatchingGame';
@@ -13,7 +15,9 @@ import { ReadAloudGame } from '../features/games/speech/ReadAloudGame';
 import { TagalogEchoGame } from '../features/games/speech/TagalogEchoGame';
 import { TagalogReadAloudGame } from '../features/games/speech/TagalogReadAloudGame';
 import { RhymePickGame } from '../features/games/speech/RhymePickGame';
+import { ClockGame } from '../features/games/clock/ClockGame';
 import { ColorSortingGame } from '../features/games/sorting/ColorSortingGame';
+import type { GameId } from '../core/constants/games';
 import { colors, spacing } from '../core/theme';
 import { RootStackParamList } from '../navigation/types';
 import {
@@ -90,24 +94,7 @@ export function GameScreen({ navigation, route }: Props) {
         style={[styles.body, showRest && styles.dimmed]}
         pointerEvents={showRest ? 'none' : 'auto'}
       >
-        {gameId === 'matching' ? (
-          <ShapeMatchingGame onBack={onBack} />
-        ) : null}
-        {gameId === 'sorting' ? (
-          <ColorSortingGame onBack={onBack} />
-        ) : null}
-        {gameId === 'patterns' ? (
-          <PatternCompletionGame onBack={onBack} />
-        ) : null}
-        {gameId === 'emotions' ? (
-          <EmotionMatchingGame onBack={onBack} />
-        ) : null}
-        {gameId === 'sounds' ? <SoundMatchingGame onBack={onBack} /> : null}
-        {gameId === 'echo' ? <EchoWordsGame onBack={onBack} /> : null}
-        {gameId === 'rhymes' ? <RhymePickGame onBack={onBack} /> : null}
-        {gameId === 'reading' ? <ReadAloudGame onBack={onBack} /> : null}
-        {gameId === 'tagalogEcho' ? <TagalogEchoGame onBack={onBack} /> : null}
-        {gameId === 'tagalogRead' ? <TagalogReadAloudGame onBack={onBack} /> : null}
+        <GameBody gameId={gameId} onBack={onBack} />
       </View>
 
       <SoftModal
@@ -121,8 +108,76 @@ export function GameScreen({ navigation, route }: Props) {
   );
 }
 
+function GameBody({ gameId, onBack }: { gameId: GameId; onBack: () => void }) {
+  switch (gameId) {
+    case 'matching':
+      return <ShapeMatchingGame onBack={onBack} />;
+    case 'sorting':
+      return <ColorSortingGame onBack={onBack} />;
+    case 'patterns':
+      return <PatternCompletionGame onBack={onBack} />;
+    case 'emotions':
+      return <EmotionMatchingGame onBack={onBack} />;
+    case 'sounds':
+      return <SoundMatchingGame onBack={onBack} />;
+    case 'echo':
+      return <EchoWordsGame onBack={onBack} />;
+    case 'rhymes':
+      return <RhymePickGame onBack={onBack} />;
+    case 'reading':
+      return <ReadAloudGame onBack={onBack} />;
+    case 'clock':
+      return <ClockGame onBack={onBack} />;
+    case 'tagalogEcho':
+      return <TagalogEchoGame onBack={onBack} />;
+    case 'tagalogRead':
+      return <TagalogReadAloudGame onBack={onBack} />;
+    default: {
+      const _exhaustive: never = gameId;
+      return (
+        <MissingGamePlaceholder id={String(_exhaustive)} onBack={onBack} />
+      );
+    }
+  }
+}
+
+function MissingGamePlaceholder({
+  id,
+  onBack,
+}: {
+  id: string;
+  onBack: () => void;
+}) {
+  return (
+    <View style={missingStyles.wrap}>
+      <SoftCard style={missingStyles.card}>
+        <Text style={missingStyles.title}>This activity did not load</Text>
+        <Text style={missingStyles.body}>
+          Try fully closing the app and opening it again. If you are developing, stop Expo and run
+          with a clear cache: npx expo start -c
+        </Text>
+        <Text style={missingStyles.hint}>({id})</Text>
+        <CalmButton label="Back to games" variant="secondary" onPress={onBack} />
+      </SoftCard>
+    </View>
+  );
+}
+
+const missingStyles = StyleSheet.create({
+  wrap: {
+    flex: 1,
+    minHeight: 0,
+    width: '100%',
+    justifyContent: 'center',
+  },
+  card: { padding: spacing.lg, gap: spacing.md },
+  title: { fontSize: 18, fontWeight: '700', color: colors.text },
+  body: { fontSize: 15, color: colors.textMuted, lineHeight: 22 },
+  hint: { fontSize: 12, color: colors.textMuted },
+});
+
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
-  body: { flex: 1, padding: spacing.lg },
+  body: { flex: 1, minHeight: 0, padding: spacing.lg },
   dimmed: { opacity: 0.35 },
 });

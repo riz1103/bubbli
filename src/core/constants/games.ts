@@ -7,6 +7,7 @@ export type GameId =
   | 'echo'
   | 'rhymes'
   | 'reading'
+  | 'clock'
   | 'tagalogEcho'
   | 'tagalogRead';
 
@@ -73,6 +74,13 @@ export const GAMES: GameMeta[] = [
     title: 'Read aloud',
     subtitle: 'Read sentences — mic listens when you want',
     emoji: '◈',
+    available: true,
+  },
+  {
+    id: 'clock',
+    title: 'Clock fun',
+    subtitle: 'Read the time — then set the hands',
+    emoji: '🕐',
     available: true,
   },
   {

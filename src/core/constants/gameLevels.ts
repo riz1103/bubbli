@@ -12,6 +12,7 @@ export const LEVEL_GAME_IDS: readonly GameId[] = [
   'echo',
   'rhymes',
   'reading',
+  'clock',
   'tagalogEcho',
   'tagalogRead',
 ] as const;
@@ -28,6 +29,7 @@ export function defaultGameLevels(): Record<LevelGameId, number> {
     echo: 1,
     rhymes: 1,
     reading: 1,
+    clock: 1,
     tagalogEcho: 1,
     tagalogRead: 1,
   };
