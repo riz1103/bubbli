@@ -181,8 +181,7 @@ dependencies {
     }
 }
 
-// New Architecture: CMake can run (configure-on-demand) before autolinked libraries emit
-// codegen jni/CMakeLists.txt — e.g. react-native-async-storage — and the build fails.
+// New Architecture: CMake can run before autolinked libs emit codegen jni (e.g. async-storage).
 afterEvaluate {
     def codegen = tasks.findByPath(":react-native-async-storage_async-storage:generateCodegenArtifactsFromSchema")
     if (codegen != null) {
