@@ -41,6 +41,8 @@ Speech recognition uses `expo-speech-recognition`; for full native behavior, use
 
 After `npm install`, a **postinstall** script may download the upstream Android Kotlin sources for `expo-speech-recognition` (v3.1.2) if they are missing from the npm package, so Gradle can compile `ExpoSpeechRecognitionModule`. If an Android build still fails after updating dependencies, run `npm install` again or `node scripts/ensure-expo-speech-recognition-android.mjs`, then clean with `cd android && .\gradlew.bat clean` and rebuild.
 
+If CMake reports **missing `CMakeLists.txt`** under `@react-native-async-storage/.../codegen/jni`, the Android `app/build.gradle` is set to run **async-storage codegen** before `configureCMake` tasks; use a clean build (`cd android && .\gradlew.bat clean`) and build again.
+
 ## Scripts
 
 | Command | Description |
