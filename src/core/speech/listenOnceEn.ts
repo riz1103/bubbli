@@ -109,6 +109,25 @@ async function restoreAudioAfterRecognition(): Promise<void> {
   }
 }
 
+/** Avoid hanging forever if expo-av never settles (can strand the mic UI). */
+function withTimeout<T>(p: Promise<T>, ms: number, label: string): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const t = setTimeout(() => {
+      reject(new Error(`${label} timed out after ${ms}ms`));
+    }, ms);
+    p.then(
+      (v) => {
+        clearTimeout(t);
+        resolve(v);
+      },
+      (e) => {
+        clearTimeout(t);
+        reject(e);
+      }
+    );
+  });
+}
+
 /**
  * Captures one utterance in the given locale.
  */
@@ -149,7 +168,11 @@ export async function listenOnce(options: ListenOnceOptions): Promise<ListenOnce
     /* ignore */
   }
 
-  await prepareAudioForRecognition();
+  try {
+    await withTimeout(prepareAudioForRecognition(), 5000, 'prepareAudioForRecognition');
+  } catch {
+    /* still try listening — mode may already be usable */
+  }
 
   const useOnDeviceOnly =
     options.strictOfflineOnly && onDeviceOk;
@@ -158,22 +181,25 @@ export async function listenOnce(options: ListenOnceOptions): Promise<ListenOnce
     const subs: { remove: () => void }[] = [];
     let lastText = '';
     let settled = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
 
-    const finish = async (r: ListenOnceResult) => {
+    const finish = (r: ListenOnceResult) => {
       if (settled) return;
       settled = true;
-      clearTimeout(timer);
+      if (timer !== undefined) clearTimeout(timer);
       subs.forEach((s) => s.remove());
       void ExpoSpeechRecognitionModule.stop().catch(() => {});
-      await restoreAudioAfterRecognition();
       resolve(r);
+      void withTimeout(restoreAudioAfterRecognition(), 4000, 'restoreAudioAfterRecognition').catch(
+        () => {}
+      );
     };
 
     const settle = (r: ListenOnceResult) => {
-      void finish(r);
+      finish(r);
     };
 
-    const timer = setTimeout(() => {
+    timer = setTimeout(() => {
       const t = lastText.trim();
       if (t.length > 0) settle({ ok: true, transcript: t });
       else settle({ ok: false, reason: 'timeout' });
