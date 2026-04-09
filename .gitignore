@@ -37,6 +37,5 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
-# generated native folders
+# generated native folders (iOS prebuild; Android is tracked for EAS — see android/.gitignore)
 /ios
-/android
