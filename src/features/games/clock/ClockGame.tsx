@@ -75,6 +75,33 @@ function initialWrongGuess(target: ClockTime, level: number): ClockTime {
 
 type RoundMode = 'read' | 'set';
 
+function dialLabelsForLevel(level: number): 'none' | 'quarter' | 'full' {
+  // Phase 1: whole hour only
+  if (level <= 16) return 'full';
+  if (level <= 25) return 'quarter';
+
+  // Phase 2: half-hours introduced -> restore stronger aid, then taper
+  if (level <= 40) return 'full';
+  if (level <= 52) return 'quarter';
+  if (level <= 60) return 'none';
+
+  // Phase 3: quarter-hours introduced -> restore aid again, then taper
+  if (level <= 75) return 'full';
+  if (level <= 90) return 'quarter';
+  return 'none';
+}
+
+function dialAidNoteForLevel(level: number): string | null {
+  // Show only when a new minute-hand phase starts and we restore full numbers.
+  if (level >= 26 && level <= 40) {
+    return 'New step: the long hand is now active. Numbers are shown to help.';
+  }
+  if (level >= 61 && level <= 75) {
+    return 'New step: quarter hours are active. Numbers are shown again to guide you.';
+  }
+  return null;
+}
+
 export function ClockGame({ onBack }: { onBack: () => void }) {
   const insets = useSafeAreaInsets();
   const { scale, g, fs } = useResponsiveGameScale();
@@ -99,7 +126,8 @@ export function ClockGame({ onBack }: { onBack: () => void }) {
   const [correctInBatch, setCorrectInBatch] = useState(0);
 
   const clockSize = Math.max(160, Math.min(280, g(280)));
-  const showClockNumbers = level <= 25;
+  const numberLabels = dialLabelsForLevel(level);
+  const dialAidNote = dialAidNoteForLevel(level);
 
   const levelHint =
     level <= 25
@@ -179,6 +207,9 @@ export function ClockGame({ onBack }: { onBack: () => void }) {
           ? 'Read the hands, then tap the matching time.'
           : `Make the clock show ${formatDigital(target)}. Drag the short hand for the hour and the long hand for minutes.`}
       </Text>
+      {dialAidNote ? (
+        <Text style={[styles.aidNote, { fontSize: fs(13) }]}>{dialAidNote}</Text>
+      ) : null}
 
       <ProgressDots total={PROGRESS_STEPS} filled={correctInBatch} scale={scale} />
 
@@ -188,7 +219,7 @@ export function ClockGame({ onBack }: { onBack: () => void }) {
             hour={target.h}
             minute={target.m}
             size={clockSize}
-            showNumbers={showClockNumbers}
+            numberLabels={numberLabels}
           />
         ) : (
           <>
@@ -200,7 +231,7 @@ export function ClockGame({ onBack }: { onBack: () => void }) {
               minute={guess.m}
               size={clockSize}
               allowedMinutes={mins}
-              showNumbers={showClockNumbers}
+              numberLabels={numberLabels}
               onTimeChange={(next) => setGuess(next)}
             />
           </>
@@ -250,6 +281,7 @@ const styles = StyleSheet.create({
   },
   heading: { color: colors.text, textAlign: 'center', fontWeight: '600' },
   sub: { color: colors.textMuted, textAlign: 'center' },
+  aidNote: { color: colors.primaryDark, textAlign: 'center', fontWeight: '600' },
   goalPill: {
     fontWeight: '700',
     color: colors.primary,

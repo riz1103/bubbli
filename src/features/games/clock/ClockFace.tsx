@@ -2,17 +2,22 @@ import { StyleSheet, Text, View } from 'react-native';
 import { colors } from '../../../core/theme';
 
 type Props = {
-  hour: number; // 1–12
-  minute: number; // 0–59
+  hour: number; // 1?12
+  minute: number; // 0?59
   size: number;
-  /** Beginner aid: show 1–12 around face */
-  showNumbers?: boolean;
+  /** Difficulty aid on the dial */
+  numberLabels?: 'none' | 'quarter' | 'full';
 };
 
 /**
- * Analog face with Views only. Each hand’s pivot is the bottom-center of the hand (clock center).
+ * Analog face with Views only. Each hand?s pivot is the bottom-center of the hand (clock center).
  */
-export function ClockFace({ hour, minute, size, showNumbers = false }: Props) {
+export function ClockFace({
+  hour,
+  minute,
+  size,
+  numberLabels = 'none',
+}: Props) {
   const r = size / 2;
   const minLen = r * 0.78;
   const hourLen = r * 0.52;
@@ -24,6 +29,12 @@ export function ClockFace({ hour, minute, size, showNumbers = false }: Props) {
   const dot = Math.max(8, size * 0.07);
   const numRadius = r * 0.78;
   const numFont = Math.max(12, Math.round(size * 0.07));
+  const labels =
+    numberLabels === 'full'
+      ? [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+      : numberLabels === 'quarter'
+        ? [12, 3, 6, 9]
+        : [];
 
   return (
     <View
@@ -32,13 +43,13 @@ export function ClockFace({ hour, minute, size, showNumbers = false }: Props) {
     >
       <View style={[styles.face, { width: size, height: size, borderRadius: r }]} />
 
-      {showNumbers
-        ? Array.from({ length: 12 }, (_, i) => {
-            const n = i + 1;
+      {labels.length > 0
+        ? labels.map((n) => {
             const deg = n * 30;
             const rad = (deg * Math.PI) / 180;
             const x = r + numRadius * Math.sin(rad);
             const y = r - numRadius * Math.cos(rad);
+            const xOffset = n >= 10 ? numFont * 0.55 : numFont * 0.28;
             return (
               <Text
                 key={n}
@@ -46,7 +57,7 @@ export function ClockFace({ hour, minute, size, showNumbers = false }: Props) {
                   styles.num,
                   {
                     fontSize: numFont,
-                    left: x - numFont * 0.32,
+                    left: x - xOffset,
                     top: y - numFont * 0.5,
                   },
                 ]}
