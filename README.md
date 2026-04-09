@@ -39,6 +39,8 @@ npm run ios
 
 Speech recognition uses `expo-speech-recognition`; for full native behavior, use a **development build** or production build rather than relying on Expo Go alone.
 
+After `npm install`, a **postinstall** script may download the upstream Android Kotlin sources for `expo-speech-recognition` (v3.1.2) if they are missing from the npm package, so Gradle can compile `ExpoSpeechRecognitionModule`. If an Android build still fails after updating dependencies, run `npm install` again or `node scripts/ensure-expo-speech-recognition-android.mjs`, then clean with `cd android && .\gradlew.bat clean` and rebuild.
+
 ## Scripts
 
 | Command | Description |
