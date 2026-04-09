@@ -99,6 +99,7 @@ export function ClockGame({ onBack }: { onBack: () => void }) {
   const [correctInBatch, setCorrectInBatch] = useState(0);
 
   const clockSize = Math.max(160, Math.min(280, g(280)));
+  const showClockNumbers = level <= 25;
 
   const levelHint =
     level <= 25
@@ -183,7 +184,12 @@ export function ClockGame({ onBack }: { onBack: () => void }) {
 
       <SoftCard style={{ padding: g(16), alignItems: 'center' }}>
         {mode === 'read' ? (
-          <ClockFace hour={target.h} minute={target.m} size={clockSize} />
+          <ClockFace
+            hour={target.h}
+            minute={target.m}
+            size={clockSize}
+            showNumbers={showClockNumbers}
+          />
         ) : (
           <>
             <Text style={[styles.goalPill, { fontSize: fs(15), marginBottom: g(10) }]}>
@@ -194,6 +200,7 @@ export function ClockGame({ onBack }: { onBack: () => void }) {
               minute={guess.m}
               size={clockSize}
               allowedMinutes={mins}
+              showNumbers={showClockNumbers}
               onTimeChange={(next) => setGuess(next)}
             />
           </>
@@ -259,3 +266,4 @@ const styles = StyleSheet.create({
   choiceText: { fontWeight: '700', color: colors.text },
   pressed: { opacity: 0.88 },
 });
+

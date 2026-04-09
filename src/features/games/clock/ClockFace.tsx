@@ -1,16 +1,18 @@
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { colors } from '../../../core/theme';
 
 type Props = {
-  hour: number; // 1â€“12
-  minute: number; // 0â€“59
+  hour: number; // 1–12
+  minute: number; // 0–59
   size: number;
+  /** Beginner aid: show 1–12 around face */
+  showNumbers?: boolean;
 };
 
 /**
- * Analog face with Views only. Each handâ€™s pivot is the bottom-center of the hand (clock center).
+ * Analog face with Views only. Each hand’s pivot is the bottom-center of the hand (clock center).
  */
-export function ClockFace({ hour, minute, size }: Props) {
+export function ClockFace({ hour, minute, size, showNumbers = false }: Props) {
   const r = size / 2;
   const minLen = r * 0.78;
   const hourLen = r * 0.52;
@@ -20,6 +22,8 @@ export function ClockFace({ hour, minute, size }: Props) {
   const handW = Math.max(4, size * 0.028);
   const minW = Math.max(2.5, size * 0.018);
   const dot = Math.max(8, size * 0.07);
+  const numRadius = r * 0.78;
+  const numFont = Math.max(12, Math.round(size * 0.07));
 
   return (
     <View
@@ -27,6 +31,31 @@ export function ClockFace({ hour, minute, size }: Props) {
       accessibilityLabel="Analog clock face"
     >
       <View style={[styles.face, { width: size, height: size, borderRadius: r }]} />
+
+      {showNumbers
+        ? Array.from({ length: 12 }, (_, i) => {
+            const n = i + 1;
+            const deg = n * 30;
+            const rad = (deg * Math.PI) / 180;
+            const x = r + numRadius * Math.sin(rad);
+            const y = r - numRadius * Math.cos(rad);
+            return (
+              <Text
+                key={n}
+                style={[
+                  styles.num,
+                  {
+                    fontSize: numFont,
+                    left: x - numFont * 0.32,
+                    top: y - numFont * 0.5,
+                  },
+                ]}
+              >
+                {n}
+              </Text>
+            );
+          })
+        : null}
 
       <View
         style={[
@@ -86,6 +115,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderWidth: 2,
     borderColor: colors.border,
+  },
+  num: {
+    position: 'absolute',
+    color: colors.textMuted,
+    fontWeight: '700',
   },
   hand: {
     position: 'absolute',

@@ -8,6 +8,7 @@ type Props = {
   minute: number;
   size: number;
   allowedMinutes: number[];
+  showNumbers?: boolean;
   onTimeChange: (next: { h: number; m: number }) => void;
 };
 
@@ -57,6 +58,7 @@ export function ClockFaceInteractive({
   minute,
   size,
   allowedMinutes,
+  showNumbers = false,
   onTimeChange,
 }: Props) {
   const wrapRef = useRef<View>(null);
@@ -137,7 +139,7 @@ export function ClockFaceInteractive({
       style={[styles.wrap, { width: size, height: size }]}
       collapsable={false}
     >
-      <ClockFace hour={hour} minute={minute} size={size} />
+      <ClockFace hour={hour} minute={minute} size={size} showNumbers={showNumbers} />
       <View
         style={[StyleSheet.absoluteFill, styles.dragLayer]}
         accessibilityLabel="Drag the short hand to set the hour or the long hand to set the minutes"
@@ -158,3 +160,4 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
 });
+
