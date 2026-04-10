@@ -128,6 +128,10 @@ function withTimeout<T>(p: Promise<T>, ms: number, label: string): Promise<T> {
   });
 }
 
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 /**
  * Captures one utterance in the given locale.
  */
@@ -162,8 +166,13 @@ export async function listenOnce(options: ListenOnceOptions): Promise<ListenOnce
     return { ok: false, reason: 'unavailable-offline' };
   }
 
+  // Some Android recognizers can tear down the next session if abort() is called right before start().
   try {
-    await ExpoSpeechRecognitionModule.abort();
+    if (Platform.OS === 'android') {
+      await ExpoSpeechRecognitionModule.stop();
+    } else {
+      await ExpoSpeechRecognitionModule.abort();
+    }
   } catch {
     /* ignore */
   }
@@ -263,8 +272,25 @@ export async function listenOnce(options: ListenOnceOptions): Promise<ListenOnce
       };
     }
 
-    void ExpoSpeechRecognitionModule.start(startPayload).catch(() => {
-      settle({ ok: false, reason: 'error', detail: 'start-failed' });
+    void ExpoSpeechRecognitionModule.start(startPayload).catch((firstErr: unknown) => {
+      // Some devices reject richer payload options or need a tiny cooldown after stop/abort.
+      const fallbackPayload: Record<string, unknown> = {
+        lang: options.lang,
+        interimResults: false,
+        continuous: false,
+        maxAlternatives: 1,
+        requiresOnDeviceRecognition: useOnDeviceOnly,
+      };
+      void sleep(220)
+        .then(() => ExpoSpeechRecognitionModule.start(fallbackPayload))
+        .catch((secondErr: unknown) => {
+          const detail = String(
+            (secondErr as { message?: string })?.message ??
+              (firstErr as { message?: string })?.message ??
+              'start-failed'
+          );
+          settle({ ok: false, reason: 'error', detail });
+        });
     });
   });
 }
