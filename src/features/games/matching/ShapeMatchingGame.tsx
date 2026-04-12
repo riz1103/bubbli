@@ -27,18 +27,33 @@ import { useGameScreenTitle } from '../../../hooks/useGameScreenTitle';
 import { useResponsiveGameScale } from '../../../hooks/useResponsiveGameScale';
 import { useAppStore } from '../../../store/appStore';
 
-export type ShapeKind = 'circle' | 'square' | 'triangle' | 'diamond';
+export type ShapeKind =
+  | 'circle'
+  | 'square'
+  | 'triangle'
+  | 'diamond'
+  | 'pentagon'
+  | 'hexagon';
 
 const BASE_SHAPES: ShapeKind[] = ['circle', 'square', 'triangle'];
 
-/** From level 4 onward, a fourth outline appears (still calm — no timers or scores). */
-const DIAMOND_FROM_LEVEL = 4;
+/** Calm ramp: level milestones add one new shape at a time. */
+const DIAMOND_FROM_LEVEL = 3;
+const PENTAGON_FROM_LEVEL = 6;
+const HEXAGON_FROM_LEVEL = 9;
 
 function shapesForLevel(level: number): ShapeKind[] {
+  const shapes = [...BASE_SHAPES];
   if (level >= DIAMOND_FROM_LEVEL) {
-    return [...BASE_SHAPES, 'diamond'];
+    shapes.push('diamond');
   }
-  return [...BASE_SHAPES];
+  if (level >= PENTAGON_FROM_LEVEL) {
+    shapes.push('pentagon');
+  }
+  if (level >= HEXAGON_FROM_LEVEL) {
+    shapes.push('hexagon');
+  }
+  return shapes;
 }
 
 function emptyPlaced(order: ShapeKind[]): Record<ShapeKind, boolean> {
@@ -47,6 +62,8 @@ function emptyPlaced(order: ShapeKind[]): Record<ShapeKind, boolean> {
     square: false,
     triangle: false,
     diamond: false,
+    pentagon: false,
+    hexagon: false,
   };
   order.forEach((k) => {
     o[k] = false;
@@ -126,6 +143,34 @@ function ShapeGlyph({
       </Svg>
     );
   }
+  if (kind === 'pentagon') {
+    const pts = `${half},${9} ${s - 10},${s * 0.38} ${s * 0.78},${s - 10} ${s * 0.22},${s - 10} ${10},${s * 0.38}`;
+    return (
+      <Svg width={s} height={s} viewBox={`0 0 ${s} ${s}`}>
+        <Polygon
+          points={pts}
+          stroke={stroke}
+          strokeWidth={sw}
+          fill={fill}
+          opacity={outline ? 1 : 0.85}
+        />
+      </Svg>
+    );
+  }
+  if (kind === 'hexagon') {
+    const pts = `${s * 0.28},${10} ${s * 0.72},${10} ${s - 10},${half} ${s * 0.72},${s - 10} ${s * 0.28},${s - 10} ${10},${half}`;
+    return (
+      <Svg width={s} height={s} viewBox={`0 0 ${s} ${s}`}>
+        <Polygon
+          points={pts}
+          stroke={stroke}
+          strokeWidth={sw}
+          fill={fill}
+          opacity={outline ? 1 : 0.85}
+        />
+      </Svg>
+    );
+  }
   const points = `${half},${12} ${s - 10},${s - 10} ${10},${s - 10}`;
   return (
     <Svg width={s} height={s} viewBox={`0 0 ${s} ${s}`}>
@@ -155,8 +200,7 @@ function Slot({
   slotPad: number;
   slotRadius: number;
 }) {
-  const label =
-    kind === 'diamond' ? 'diamond' : kind === 'circle' ? 'circle' : kind;
+  const label = kind;
   const box = shapeSize + slotPad;
   return (
     <View
@@ -218,7 +262,7 @@ export function ShapeMatchingGame({ onBack }: { onBack: () => void }) {
   /** Tighter drop zone as levels rise; adaptive tier still helps if it gets tricky */
   const snapDist = useMemo(() => {
     const base = 96 - tier * 11;
-    const levelTighten = Math.min(level, 50) * 0.85 + Math.max(0, level - 50) * 0.35;
+    const levelTighten = Math.min(level, 50) * 0.5 + Math.max(0, level - 50) * 0.2;
     return Math.max(36, (Math.max(44, base - levelTighten)) * scale);
   }, [tier, level, scale]);
 
@@ -337,9 +381,7 @@ export function ShapeMatchingGame({ onBack }: { onBack: () => void }) {
       <GameLevelBadge
         level={level}
         scale={scale}
-        subtitle={
-          totalShapes === 4 ? 'Four shapes this level' : 'Three shapes this level'
-        }
+        subtitle={`${totalShapes} shapes this level`}
       />
 
       <Text style={[styles.heading, { fontSize: fs(18) }]}>
