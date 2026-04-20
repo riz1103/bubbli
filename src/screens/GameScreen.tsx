@@ -32,8 +32,11 @@ export function GameScreen({ navigation, route }: Props) {
   const gameId = route.params.gameId;
   const addPlaytime = useAppStore((s) => s.addPlaytime);
   const rolloverDayIfNeeded = useAppStore((s) => s.rolloverDayIfNeeded);
+  const setActiveGame = useAppStore((s) => s.setActiveGame);
+  const wrongGuessNoticePulse = useAppStore((s) => s.wrongGuessNoticePulse);
 
   const [restReason, setRestReason] = useState<RestReason>(null);
+  const [wrongNotice, setWrongNotice] = useState<string | null>(null);
   /** Session length for limits — kept in a ref so we never run store updates inside setState updaters */
   const sessionMsRef = useRef(0);
 
@@ -54,6 +57,22 @@ export function GameScreen({ navigation, route }: Props) {
       queueMicrotask(() => rolloverDayIfNeeded());
     }, [rolloverDayIfNeeded])
   );
+
+  useEffect(() => {
+    setActiveGame(gameId);
+    return () => {
+      setActiveGame(null);
+    };
+  }, [gameId, setActiveGame]);
+
+  useEffect(() => {
+    if (wrongGuessNoticePulse <= 0) return;
+    setWrongNotice('Nice try! You can do it - take another guess.');
+    const id = setTimeout(() => {
+      setWrongNotice(null);
+    }, 1600);
+    return () => clearTimeout(id);
+  }, [wrongGuessNoticePulse]);
 
   useEffect(() => {
     if (restReason) return undefined;
@@ -96,6 +115,14 @@ export function GameScreen({ navigation, route }: Props) {
       >
         <GameBody gameId={gameId} onBack={onBack} />
       </View>
+
+      {wrongNotice ? (
+        <View style={styles.noticeWrap} pointerEvents="none">
+          <View style={styles.noticeBubble}>
+            <Text style={styles.noticeText}>{wrongNotice}</Text>
+          </View>
+        </View>
+      ) : null}
 
       <SoftModal
         visible={showRest}
@@ -180,4 +207,27 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   body: { flex: 1, minHeight: 0, padding: spacing.lg },
   dimmed: { opacity: 0.35 },
+  noticeWrap: {
+    position: 'absolute',
+    left: spacing.md,
+    right: spacing.md,
+    bottom: spacing.xxl,
+    alignItems: 'center',
+    zIndex: 90,
+    elevation: 10,
+  },
+  noticeBubble: {
+    backgroundColor: colors.warningSoft,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 12,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    maxWidth: '96%',
+  },
+  noticeText: {
+    color: colors.text,
+    textAlign: 'center',
+    fontWeight: '600',
+  },
 });

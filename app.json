@@ -17,6 +17,9 @@
       "infoPlist": {
         "NSMicrophoneUsageDescription": "Bubbli uses the microphone for speaking and reading practice.",
         "NSSpeechRecognitionUsageDescription": "Bubbli uses speech recognition to respond to your child's reading."
+      },
+      "runtimeVersion": {
+        "policy": "appVersion"
       }
     },
     "android": {
@@ -28,9 +31,12 @@
       "predictiveBackGestureEnabled": false,
       "permissions": [
         "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.RECORD_AUDIO",
         "android.permission.MODIFY_AUDIO_SETTINGS"
       ],
-      "package": "com.anonymous.Bubbli"
+      "package": "com.anonymous.Bubbli",
+      "runtimeVersion": "1.0.0"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -50,6 +56,9 @@
         "projectId": "0375c23c-a33e-4512-8a9d-bf2faedc0716"
       }
     },
-    "owner": "joseriz"
+    "owner": "joseriz",
+    "updates": {
+      "url": "https://u.expo.dev/0375c23c-a33e-4512-8a9d-bf2faedc0716"
+    }
   }
 }
